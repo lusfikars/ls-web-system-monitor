@@ -1,0 +1,18 @@
+System Monitor 1.0.0
+
+Intro
+
+This is a web based node.js system monitoring application.
+This application shows us percentage of CPU and memory usage, current and over time.
+It also shows us some other system informations.
+
+Installing
+
+To install this application, enter to the system-monitor directory,
+then type npm install.
+
+Next, run node server.js to run it.
+
+This application runs on port 8080 by default.
+
+So, type http://127.0.0.1:8080/ in your browser to access it. 

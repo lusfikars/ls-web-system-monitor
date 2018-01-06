@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <title>Node.js Web System Monitor - Aplikasi Buatan Lusfikar Sheba</title>
+
+        <meta name="description" content="Node.js Web System Monitor">
+        <meta name="author" content="Lusfikar Sheba">
+
+        <link rel="shortcut icon" type="image/png" href="assets/images/favicon.png"/>
+        <link rel="stylesheet" href="scripts/css/bootstrap.min.css">
+        <link rel="stylesheet" href="scripts/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="assets/css/style.css">
+        <script src="scripts/jquery.min.js"></script>
+        <script src="scripts/js/bootstrap.min.js"></script>
+        <script src="scripts/vue.js"></script>
+        <script src="scripts/vue-resource.min.js"></script>
+        <script src="scripts/Chart.js"></script>
+    </head>
+<body>
+                    
+<div id="app" class="container">
+    <nav class="navbar navbar-default navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Node.js System Monitor</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#" v-on:click="home">Home</a></li>
+                    <li><a href="#" v-on:click="about">About</a></li>
+                    <li><a href="#" v-on:click="contact">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="jumbotron">
+        <h1>{{ jumboMessage.title }}</h1>
+        <p>{{ jumboMessage.message }}</p>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <b>Current {{ cpuUsage.name }}</b>
+                </div>
+                <div class="panel-body">
+                    <canvas id="cpuUsageChartPie" width="100" height="50"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <b>{{ cpuUsage.name }} Over Time</b>
+                </div>
+                <div class="panel-body">
+                    <canvas id="cpuUsageChart" width="100" height="50"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <b>Current {{ memoryUsage.name }}</b>
+                </div>
+                <div class="panel-body">
+                    <canvas id="memoryUsageChartPie" width="100" height="50"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <b>{{ memoryUsage.name }} Over Time</b>
+                </div>
+                <div class="panel-body">
+                    <canvas id="memoryUsageChart" width="100" height="50"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <b>{{ otherInformations.name }}</b>
+                </div>
+                <table class="table table-striped">
+                    <tbody>
+                        <tr>
+                            <td><b>Platform</b></td>
+                            <td>{{ otherInformations.value.platform }}</td>
+                        </tr>
+                        <tr>
+                            <td><b>CPU Count</b></td>
+                            <td>{{ otherInformations.value.cpuCount }}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Free Memory</b></td>
+                            <td>{{ otherInformations.value.freeMem }} MB</td>
+                        </tr>
+                        <tr>
+                            <td><b>Total Memory</b></td>
+                            <td>{{ otherInformations.value.totalMem }} MB</td>
+                        </tr>
+                        <tr>
+                            <td><b>System Uptime</b></td>
+                            <td>{{ otherInformations.value.sysUpTime }} second(s)</td>
+                        </tr>
+                        <tr>
+                            <td><b>Process Uptime</b></td>
+                            <td>{{ otherInformations.value.processUpTime }} second(s)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <b>Tools</b>
+                </div>
+                <div class="panel-body text-center">
+                    <a class="btn btn-primary btn-lg" href="/api/download_snapshot">Get Snapshot!</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-default navbar-inverse">
+        <div class="container-fluid">
+            <p class="navbar-text pull-right">Copyright &#169; Lusfikar Sheba 2017</p>
+        </div>
+    </nav>
+</div>
+<script>
+var app = new Vue({
+    el: '#app',
+    data: {
+        jumboMessage: {
+            title: "Home",
+            message: "Selamat Datang di Node.js Web System Monitor!"
+        },
+        cpuUsage: {
+            name: "",
+            value: ""
+        },
+        memoryUsage: {
+            name: "",
+            value: ""
+        },
+        otherInformations: {
+            name: "",
+            value: ""
+        }
+
+    },
+    created: function() {
+        this.os_utils_cpu_usage();
+        this.timer = setInterval(this.os_utils_cpu_usage, 1000);
+
+        this.os_utils_memory_usage();
+        this.timer = setInterval(this.os_utils_memory_usage, 1000);
+
+        this.os_utils_others();
+        this.timer = setInterval(this.os_utils_others, 1000);
+    },
+    methods: {
+        home: function () {
+            this.$http.get('/api/home').then(response => {
+                    this.jumboMessage = response.body;
+                }, response => {
+
+            });
+        },
+        about: function () {
+            this.$http.get('/api/about').then(response => {
+                    this.jumboMessage = response.body;
+                }, response => {
+
+            });
+        },
+        contact: function () {
+            this.$http.get('/api/contact').then(response => {
+                    this.jumboMessage = response.body;
+                }, response => {
+
+            });
+        },
+        os_utils_cpu_usage: function () {
+            this.$http.get('/api/os_utils_cpu_usage').then(response => {
+                    this.cpuUsage = response.body;
+                }, response => {
+
+            });
+        },
+        os_utils_memory_usage: function () {
+            this.$http.get('/api/os_utils_memory_usage').then(response => {
+                    this.memoryUsage = response.body;
+                }, response => {
+
+            });
+        },
+        os_utils_others: function () {
+            this.$http.get('/api/os_utils_others').then(response => {
+                    this.otherInformations = response.body;
+                }, response => {
+
+            });
+        }
+    }
+});
+</script>
+
+<script>
+var configCPUUsagePie = {
+    type: 'pie',
+    data: {
+        labels: [
+            "CPU Used",
+            "CPU Free"
+        ],
+        datasets: [{
+            data: [100, 50],
+            backgroundColor: [
+            "#FF6384",
+            "#36A2EB"
+            ],
+            hoverBackgroundColor: [
+            "#FF6384",
+            "#36A2EB"
+            ]
+        }]
+    }
+};
+
+var cpuUsageChartPie = new Chart(document.getElementById("cpuUsageChartPie").getContext("2d"), configCPUUsagePie);
+
+setInterval(function(){
+    configCPUUsagePie.data.datasets[0].data[0] = app.cpuUsage.value * 100;
+    configCPUUsagePie.data.datasets[0].data[1] = (1 - app.cpuUsage.value) * 100;
+    cpuUsageChartPie.update();
+}, 1000);
+</script>
+
+<script>
+var configCPUUsage = {
+  type: 'line',
+  data: {
+    labels: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+    datasets: [{
+      label: "CPU Usage Over Time",
+      data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      fill: false
+    }]
+  }
+};
+
+var cpuUsageChart = new Chart(document.getElementById("cpuUsageChart").getContext("2d"), configCPUUsage);
+
+setInterval(function(){
+    configCPUUsage.data.datasets[0].data.shift();
+    configCPUUsage.data.datasets[0].data.push(app.cpuUsage.value * 100);
+    cpuUsageChart.update();
+}, 1000);
+</script>
+
+<script>
+var configMemoryUsagePie = {
+    type: 'pie',
+    data: {
+        labels: [
+            "Memory Used",
+            "Memory Free"
+        ],
+        datasets: [{
+            data: [100, 50],
+            backgroundColor: [
+            "#FF6384",
+            "#36A2EB"
+            ],
+            hoverBackgroundColor: [
+            "#FF6384",
+            "#36A2EB"
+            ]
+        }]
+    }
+};
+
+var memoryUsageChartPie = new Chart(document.getElementById("memoryUsageChartPie").getContext("2d"), configMemoryUsagePie);
+
+setInterval(function(){
+    configMemoryUsagePie.data.datasets[0].data[0] = app.memoryUsage.value * 100;
+    configMemoryUsagePie.data.datasets[0].data[1] = (1 - app.memoryUsage.value) * 100;
+    memoryUsageChartPie.update();
+}, 1000);
+</script>
+
+<script>
+var configMemoryUsage = {
+  type: 'line',
+  data: {
+    labels: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+    datasets: [{
+      label: "Memory Usage Over Time",
+      data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      fill: false
+    }]
+  }
+};
+
+var memoryUsageChart = new Chart(document.getElementById("memoryUsageChart").getContext("2d"), configMemoryUsage);
+
+setInterval(function(){
+    configMemoryUsage.data.datasets[0].data.shift();
+    configMemoryUsage.data.datasets[0].data.push(app.memoryUsage.value * 100);
+    memoryUsageChart.update();
+}, 1000);
+</script>
+</body>
+</html>

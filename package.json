@@ -1,0 +1,21 @@
+{
+  "name": "ls-web-system-monitor",
+  "version": "1.0.0",
+  "description": "Aplikasi system monitor untuk web.",
+  "main": "server.js",
+  "scripts": {
+	"start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Rakifsul (Lusfikar Sheba)",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "chart.js": "^2.5.0",
+    "express": "^4.15.2",
+    "jquery": "^3.2.1",
+    "os-utils": "0.0.14",
+    "vue": "^2.2.6",
+    "vue-resource": "^1.2.1"
+  }
+}
