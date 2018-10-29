@@ -3,4 +3,4 @@ Single Page Web Application to watch the server stats.
 
 For commercial purpose, please refer to this page:
 
-http://www.lusfikars.space/2018/10/nodejs-web-heartmon-script.html
+https://srakifsul.netlify.com/web-heartmon-a-web-system-monitor-written-in-nodejs.html
